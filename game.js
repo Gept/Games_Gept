@@ -1,5 +1,7 @@
 'use strict';
 
+// форматирование не соответствует правилам
+// https://netology-university.bitbucket.io/codestyle/javascript/
 class Vector {
     constructor(x = 0, y = 0) { 
         this.x = x;
@@ -19,6 +21,8 @@ class Vector {
 
 class Actor {
     constructor(pos, size, speed) {
+        // тут нужно использовать задание
+        // значений аргументов по-умолчанию
         if (!pos) {
             pos = new Vector(0, 0);
         }
@@ -29,6 +33,7 @@ class Actor {
             speed = new Vector(0, 0);
         }
 
+        // форматирование
         if (!(pos instanceof Vector) ||
         !(size instanceof Vector) ||
         !(speed instanceof Vector)) {
@@ -77,6 +82,9 @@ class Level {
         this.width = this.grid.reduce((memo, item) => {
             if (memo > item.length) {
                 return memo;
+            // если if заканчивается на return, то else не нужен
+            // в данном случае можно записать короче
+            // с помощью тренарного оператора сравнения
             } else {
                 return item.length;
             }
@@ -122,6 +130,8 @@ class Level {
         }
     }
     removeActor(actor) {
+        // обхект ищется в массиве 2 раза (includes и indexOf)
+        // нужно сделать, чтобы искался 1 раз
         if (this.actors.includes(actor)) {
             this.actors.splice(this.actors.indexOf(actor), 1);
         }
@@ -143,6 +153,7 @@ class Level {
             if (this.noMoreActors('coin')) {
                 this.status = 'won';
             }
+            // лишняя строчка
             return;
         }
     }
@@ -153,25 +164,36 @@ class LevelParser {
       this.obj = obj;
     }
     actorFromSymbol(symb) {
+      // проверка лишняя
       if (!(symb && this.obj)) {return undefined};
       return this.obj[symb];
     }
     obstacleFromSymbol(symb) {
+      // проверка лишняя
       if (!symb) return undefined;
       return symbolObstacle[symb];    
     }
     createGrid(plan) {
+      // здесь можно использовать сокращённую форму записи стрелочной функции
       return plan.map(row => {
+        // строки лучше преобразовывать в массив с помощью метода split
         return [...row].map(el => symbolObstacle[el]);
       });
     }
     createActors(plan) {
+      // заменить всё на стрелочные функции, убратьthisPlan
       let thisPlan = this;
       return plan.reduce(function(result, rowY, y) {
+        // split
         [...rowY].forEach(function(rowX, x) {
+          // лишняя проверка
           if (rowX) {
+            // если значнеие присваивается переменной 1 раз,
+            // то лучше использовать const
             let constructor = thisPlan.actorFromSymbol(rowX);
+            // первая половина проверки лишняя
             if (constructor && typeof constructor === 'function') {
+              // const
               let actor = new constructor (new Vector(x, y));
               if (actor instanceof Actor) {
                 result.push(actor);
@@ -193,6 +215,7 @@ class LevelParser {
     '!': 'lava'
   };
   
+  // не используется
   const plan = [
     ' @ ',
     'x!x'
