@@ -1,13 +1,13 @@
 'use strict';
 class Vector {
-    constructor(x = 0, y = 0) { 
+    constructor(x = 0, y = 0) {
         this.x = x;
         this.y = y;
     }
     plus(vector) {
         if (!(vector instanceof Vector)) {
             throw new Error('Можно прибавлять к вектору только вектор типа Vector.');
-        }      
+        }
         return new Vector(this.x + vector.x, this.y + vector.y);
     }
     times(constant) {
@@ -43,24 +43,25 @@ class Actor {
     isIntersect(otherActor) {
         if (!(otherActor instanceof Actor)) {
             throw new Error('Ошибка: Должен быть передан объект типа Actor.');
-        } 
+        }
         if (otherActor === this) {
             return false;
         }
         return this.right > otherActor.left && this.left < otherActor.right && this.top < otherActor.bottom && this.bottom > otherActor.top
+        // форматирование
         }
     }
 class Level {
-    constructor(grid = [], actors = []) { 
-        this.grid = grid; 
-        this.actors = actors; 
-        this.player = this.actors.find(actor => actor.type === 'player'); 
-        this.height = this.grid.length; 
+    constructor(grid = [], actors = []) {
+        this.grid = grid;
+        this.actors = actors;
+        this.player = this.actors.find(actor => actor.type === 'player');
+        this.height = this.grid.length;
         this.width = this.grid.reduce((memo, item) => (memo > item.length) ?  memo : item.length, 0);
-        this.status = null; 
-        this.finishDelay = 1; 
+        this.status = null;
+        this.finishDelay = 1;
     }
-    isFinished() { 
+    isFinished() {
         return this.status !== null && this.finishDelay < 0;
     }
     actorAt(actor) {
@@ -79,7 +80,7 @@ class Level {
         const bottomObstacle = Math.ceil(pos.y + size.y);
         if (leftObstacle < 0 || rightObstacle > this.width || topObstacle < 0) {
             return 'wall';
-        } 
+        }
         if (bottomObstacle > this.height) {
             return 'lava';
         }
@@ -94,6 +95,7 @@ class Level {
     }
     removeActor(actor) {
         const index = this.actors.indexOf(actor);
+        // используйте === и !==
         if (index!=-1) {
             this.actors.splice(index, 1);
         }
@@ -106,7 +108,7 @@ class Level {
             return;
         }
         if (type === 'lava' || type === 'fireball') {
-            this.status = 'lost'; 
+            this.status = 'lost';
             return;
         }
         if (type === 'coin' && actor.type === 'coin') {
@@ -118,18 +120,23 @@ class Level {
     }
 }
 class LevelParser {
-    constructor(obj) { 
+    constructor(obj) {
       this.obj = obj;
     }
     actorFromSymbol(symb) {
+      // проверка лишняя
       if (!(symb && this.obj)) {return undefined};
       return this.obj[symb];
     }
     obstacleFromSymbol(symb) {
+      // проверка лишняя
+      // лучше не опускать фигурные скобки у if
       if (!symb) return undefined;
-      return symbolObstacle[symb];    
+      return symbolObstacle[symb];
     }
     createGrid(plan) {
+      // строку в массив лучше преобразовывать с помощью метода split
+      // тогда сразу видно, что работа идёт со строкой
       return plan.map(row => [...row].map(el => symbolObstacle[el]));
     }
     createActors(plan) {
@@ -146,7 +153,7 @@ class LevelParser {
         return result;
       }, []);
     }
-  
+
     parse(plan) {
       return new Level(this.createGrid(plan), this.createActors(plan));
     }
