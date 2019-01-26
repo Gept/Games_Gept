@@ -1,17 +1,13 @@
 'use strict';
-
-// форматирование не соответствует правилам
-// https://netology-university.bitbucket.io/codestyle/javascript/
 class Vector {
-    constructor(x = 0, y = 0) { 
+    constructor(x = 0, y = 0) {
         this.x = x;
         this.y = y;
     }
-
     plus(vector) {
         if (!(vector instanceof Vector)) {
             throw new Error('Можно прибавлять к вектору только вектор типа Vector.');
-        }      
+        }
         return new Vector(this.x + vector.x, this.y + vector.y);
     }
     times(constant) {
@@ -20,23 +16,8 @@ class Vector {
 }
 
 class Actor {
-    constructor(pos, size, speed) {
-        // тут нужно использовать задание
-        // значений аргументов по-умолчанию
-        if (!pos) {
-            pos = new Vector(0, 0);
-        }
-        if (!size) {
-            size = new Vector(1, 1);
-        }
-        if (!speed) {
-            speed = new Vector(0, 0);
-        }
-
-        // форматирование
-        if (!(pos instanceof Vector) ||
-        !(size instanceof Vector) ||
-        !(speed instanceof Vector)) {
+    constructor(pos = new Vector(0, 0), size = new Vector(1, 1), speed = new Vector(0, 0)) {
+        if (!(pos instanceof Vector) ||!(size instanceof Vector) ||!(speed instanceof Vector)) {
             throw new Error(`Ошибка: Конструктор должен иметь объект типа Vector.`);
         }
         this.pos = pos;
@@ -62,37 +43,25 @@ class Actor {
     isIntersect(otherActor) {
         if (!(otherActor instanceof Actor)) {
             throw new Error('Ошибка: Должен быть передан объект типа Actor.');
-        } 
-        // Объект не пересекается сам с собой.
+        }
         if (otherActor === this) {
             return false;
         }
-        return this.right > otherActor.left && 
-            this.left < otherActor.right && 
-            this.top < otherActor.bottom && 
-            this.bottom > otherActor.top
+        return this.right > otherActor.left && this.left < otherActor.right && this.top < otherActor.bottom && this.bottom > otherActor.top
+        // форматирование
         }
     }
 class Level {
-    constructor(grid = [], actors = []) { 
-        this.grid = grid; 
-        this.actors = actors; 
-        this.player = this.actors.find(actor => actor.type === 'player'); 
-        this.height = this.grid.length; 
-        this.width = this.grid.reduce((memo, item) => {
-            if (memo > item.length) {
-                return memo;
-            // если if заканчивается на return, то else не нужен
-            // в данном случае можно записать короче
-            // с помощью тренарного оператора сравнения
-            } else {
-                return item.length;
-            }
-        }, 0);
-        this.status = null; 
-        this.finishDelay = 1; 
+    constructor(grid = [], actors = []) {
+        this.grid = grid;
+        this.actors = actors;
+        this.player = this.actors.find(actor => actor.type === 'player');
+        this.height = this.grid.length;
+        this.width = this.grid.reduce((memo, item) => (memo > item.length) ?  memo : item.length, 0);
+        this.status = null;
+        this.finishDelay = 1;
     }
-    isFinished() { 
+    isFinished() {
         return this.status !== null && this.finishDelay < 0;
     }
     actorAt(actor) {
@@ -102,24 +71,19 @@ class Level {
         return this.actors.find(el => el.isIntersect(actor));
     }
     obstacleAt(pos, size) {
-        if (!(pos instanceof Vector) 
-            || !(size instanceof Vector) ) {
+        if (!(pos instanceof Vector) || !(size instanceof Vector) ) {
             throw new Error('Ошибка: Должен быть передан объект типа Vector.');
         }
         const leftObstacle = Math.floor(pos.x);
         const rightObstacle = Math.ceil(pos.x + size.x);
         const topObstacle = Math.floor(pos.y);
         const bottomObstacle = Math.ceil(pos.y + size.y);
-        if (leftObstacle < 0 
-            || rightObstacle > this.width 
-            || topObstacle < 0) {
+        if (leftObstacle < 0 || rightObstacle > this.width || topObstacle < 0) {
             return 'wall';
-        } 
-
+        }
         if (bottomObstacle > this.height) {
             return 'lava';
         }
-
         for (let i = topObstacle; i < bottomObstacle; i++) {
             for (let j = leftObstacle; j < rightObstacle; j++) {
                 const gridLevel = this.grid[i][j];
@@ -130,22 +94,21 @@ class Level {
         }
     }
     removeActor(actor) {
-        // обхект ищется в массиве 2 раза (includes и indexOf)
-        // нужно сделать, чтобы искался 1 раз
-        if (this.actors.includes(actor)) {
-            this.actors.splice(this.actors.indexOf(actor), 1);
+        const index = this.actors.indexOf(actor);
+        // используйте === и !==
+        if (index!=-1) {
+            this.actors.splice(index, 1);
         }
     }
     noMoreActors(type) {
         return this.actors.findIndex(el => el.type === type) === -1;
     }
-
     playerTouched(type, actor) {
         if (this.status !== null) {
             return;
         }
         if (type === 'lava' || type === 'fireball') {
-            this.status = 'lost'; 
+            this.status = 'lost';
             return;
         }
         if (type === 'coin' && actor.type === 'coin') {
@@ -153,14 +116,11 @@ class Level {
             if (this.noMoreActors('coin')) {
                 this.status = 'won';
             }
-            // лишняя строчка
-            return;
         }
     }
 }
-
 class LevelParser {
-    constructor(obj) { 
+    constructor(obj) {
       this.obj = obj;
     }
     actorFromSymbol(symb) {
@@ -170,57 +130,38 @@ class LevelParser {
     }
     obstacleFromSymbol(symb) {
       // проверка лишняя
+      // лучше не опускать фигурные скобки у if
       if (!symb) return undefined;
-      return symbolObstacle[symb];    
+      return symbolObstacle[symb];
     }
     createGrid(plan) {
-      // здесь можно использовать сокращённую форму записи стрелочной функции
-      return plan.map(row => {
-        // строки лучше преобразовывать в массив с помощью метода split
-        return [...row].map(el => symbolObstacle[el]);
-      });
+      // строку в массив лучше преобразовывать с помощью метода split
+      // тогда сразу видно, что работа идёт со строкой
+      return plan.map(row => [...row].map(el => symbolObstacle[el]));
     }
     createActors(plan) {
-      // заменить всё на стрелочные функции, убратьthisPlan
-      let thisPlan = this;
-      return plan.reduce(function(result, rowY, y) {
-        // split
-        [...rowY].forEach(function(rowX, x) {
-          // лишняя проверка
-          if (rowX) {
-            // если значнеие присваивается переменной 1 раз,
-            // то лучше использовать const
-            let constructor = thisPlan.actorFromSymbol(rowX);
-            // первая половина проверки лишняя
-            if (constructor && typeof constructor === 'function') {
-              // const
-              let actor = new constructor (new Vector(x, y));
+      return plan.reduce((result, rowY, y) =>{
+        [...rowY].forEach((rowX, x) =>{
+            const constructor = this.actorFromSymbol(rowX);
+            if (typeof constructor === 'function') {
+              const actor = new constructor (new Vector(x, y));
               if (actor instanceof Actor) {
                 result.push(actor);
               }
             }
-          }
         });
         return result;
       }, []);
     }
-  
+
     parse(plan) {
       return new Level(this.createGrid(plan), this.createActors(plan));
     }
-  }
-
-  const symbolObstacle = {
+}
+const symbolObstacle = {
     'x': 'wall',
     '!': 'lava'
-  };
-  
-  // не используется
-  const plan = [
-    ' @ ',
-    'x!x'
-  ];
-  
+};
 class Fireball extends Actor {
     constructor(pos = new Vector(0, 0), speed = new Vector(0, 0)) {
         const size = new Vector(1, 1);
@@ -244,19 +185,16 @@ class Fireball extends Actor {
         }
     }
 }
-
 class HorizontalFireball extends Fireball {
     constructor(pos = new Vector(0, 0)) {
         super(pos, new Vector(2, 0));
     }
 }
-
 class VerticalFireball extends Fireball {
     constructor(pos = new Vector(0, 0)) {
         super(pos, new Vector(0, 2));
     }
 }
-
 class FireRain extends Fireball {
     constructor(pos = new Vector(0, 0)) {
         super(pos, new Vector(0, 3));
@@ -266,7 +204,6 @@ class FireRain extends Fireball {
         this.pos = this.startPos;
     }
 }
-
 class Coin extends Actor {
     constructor(pos = new Vector(0, 0)) {
         super(pos.plus(new Vector(0.2, 0.1)), new Vector(0.6, 0.6));
@@ -292,7 +229,6 @@ class Coin extends Actor {
         this.pos = this.getNextPosition(time);
     }
 }
-
 class Player extends Actor {
     constructor(pos = new Vector(0, 0)) {
         super(pos.plus(new Vector(0, -0.5)), new Vector(0.8, 1.5));
@@ -301,8 +237,6 @@ class Player extends Actor {
         return 'player';
     }
 }
-
-
 const actorDict = {
     '@': Player,
     'v': FireRain,
@@ -312,7 +246,6 @@ const actorDict = {
 
 };
 const parser = new LevelParser(actorDict);
-
 loadLevels()
   .then((res) => {
     runGame(JSON.parse(res), parser, DOMDisplay)
