@@ -122,7 +122,6 @@ class LevelParser {
       this.obj = obj;
     }
     actorFromSymbol(symb) {
-     // Совсем не лишняя проверка
       if (!(symb && this.obj)) {return undefined};
       return this.obj[symb];
     }
